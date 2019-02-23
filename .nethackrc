@@ -1,0 +1,8 @@
+# This is an example nethackrc file for NetHack 3.6.1.
+OPTIONS=vt_tiledata
+OPTIONS=!sparkle
+OPTIONS=windowtype:tty
+OPTIONS=time,autopickup
+OPTIONS=boulder:0
+OPTIONS=runmode:teleport
+OPTIONS=number_pad:0
