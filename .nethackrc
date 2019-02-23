@@ -3,6 +3,7 @@ OPTIONS=vt_tiledata
 OPTIONS=!sparkle
 OPTIONS=windowtype:tty
 OPTIONS=time,autopickup
+OPTIONS=pickup_types:$/=?!
 OPTIONS=boulder:0
 OPTIONS=runmode:teleport
 OPTIONS=number_pad:0
