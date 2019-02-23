@@ -36,13 +36,13 @@ NetHack writes its data into one of six game windows, which are exposed by the b
 
     Whenever you have to select items from a menu (for example chest contents, or a selection from the inventory), it gets written to the Menu window. For example, after pressing `?` when asked what the character wants to eat:
 
-    > Comestibles 
-    > v - an uncursed slime mold
-    > d - an uncursed food ration
-    > q - a food ration
-    > e - an uncursed lembas wafer
-    > b - an uncursed lizard corpse
-    > (end)
+    > Comestibles     
+    > v - an uncursed slime mold   
+    > d - an uncursed food ration   
+    > q - a food ration   
+    > e - an uncursed lembas wafer   
+    > b - an uncursed lizard corpse   
+    > (end)   
 
 5.  **Text**
 
