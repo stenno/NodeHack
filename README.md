@@ -14,20 +14,24 @@ Currently, the library relies on the [vt_tiledata](https://nethackwiki.com/wiki/
 
 NetHack writes its data into one of six game windows, which are exposed by the bindings:
 
-1. Message
+1. **Message**
+
    All messages and prompts are written to this window.
    > What do you want to eat? [bdeqv or ?*] 
 
    > Never mind.
 
-2. Status
+2. **Status**
+
    The status window, also known as botl (bottom line), contains the name of the character, their attributes and game information
    > [Stenno the Warrior            ] St:18/12 Dx:15 Co:19 In:10 Wi:10 Ch:13 Lawful   lvl:15 $:0 HP:142(142) Pw:20(20) AC:-11 Xp:14 T:10160 Satiated
 
-3. Map
+3. **Map**
+
    This window holds the current map as it's drawn by the game. The tile ID maps each cell to its respective tile.
 
-4. Menu
+4. **Menu**
+
    Whenever you have to select items from a menu (for example chest contents, or a selection from the inventory), it gets written to the Menu window. For example, after pressing `?` when asked what the character wants to eat:
    > Comestibles 
    > v - an uncursed slime mold
@@ -37,10 +41,10 @@ NetHack writes its data into one of six game windows, which are exposed by the b
    > b - an uncursed lizard corpse
    > (end)
 
-5. Text
+5. **Text**
    This window displays non-interactive text. Executing the `#version` extcommand or the quest nemesis lair text gets written to this window.
 
-6. Base
+6. **Base**
    This window is used for absolute movement and also serves as a fallback window.
 
 ---
