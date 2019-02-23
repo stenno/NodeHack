@@ -1,5 +1,22 @@
 {
-  "server": "nethack@eu.hardfought.org",
   "username": "stenno",
-  "password": "not my password"
+  "password": "not my password",
+  "servers": {
+    "nao": {
+      "sshHost": "nethack@alt.org",
+      "dglStartGame": "pp"
+    },
+    "hardfoughtEU": {
+      "sshHost": "nethack@eu.hardfought.org",
+      "dglStartGame": "v"
+    },
+    "hardfoughtUS": {
+      "sshHost": "nethack@us.hardfought.org",
+      "dglStartGame": "v"
+    },
+    "hardfoughtAU": {
+      "sshHost": "nethack@au.hardfought.org",
+      "dglStartGame": "v"
+    }
+  }
 }

@@ -2,6 +2,8 @@ const { EventEmitter } = require('events');
 const Client = require('./client');
 const { NethackWindow, windowIds } = require('./nhwindow');
 
+const { servers } = require('./config');
+
 module.exports = class NethackSession extends EventEmitter {
   constructor() {
     super();
@@ -13,36 +15,45 @@ module.exports = class NethackSession extends EventEmitter {
     this.currentText = '';
   }
 
-  async loginSSH(dglUsername, dglPassword, sshAddress) {
+  async loginSSH(serverName, dglUsername, dglPassword) {
     const { client } = this;
     try {
       client.start();
-    } catch (e) {
-      throw new Error('Could not initialize session');
+    } catch ({ message }) {
+      throw new Error(`Could not initialize PTY session: ${message}`);
     }
+
+    const { sshHost, dglStartGame } = servers[serverName];
 
     try {
       // connect  to server
-      await client.doANSIInput(`ssh ${sshAddress}\n`);
-    } catch (e) {
-      throw new Error(`Could not connect to ${sshAddress}`);
+      await client.doANSIInput(`ssh ${sshHost}\n`);
+    } catch ({ message }) {
+      throw new Error(`Could not connect to ${sshHost}: ${message}`);
     }
 
     try {
       // choose option l)ogin
       // enter DGL usename
       // enter DGL password
-      // "vanilla" in HDF-Menu
       await client.doANSIInput('l');
       await client.doANSIInput(`${dglUsername}\n`);
       await client.doANSIInput(`${dglPassword}\n`);
-      await client.doANSIInput('v');
+
+      await client.doANSIInput(dglStartGame);
+    } catch ({ message }) {
+      throw new Error(`Could not login: ${message}`);
+    }
+
+    try {
+      // character pick here?
       this.windows = await client.doNHInput(' ');
       this.connected = true;
       this.update();
-    } catch (e) {
-      throw new Error(`Could not login: ${e.message}`);
+    } catch ({ message }) {
+      throw new Error(`Could not start game: ${message}`);
     }
+
     this.emit('connected');
   }
 
@@ -111,6 +122,7 @@ module.exports = class NethackSession extends EventEmitter {
       this.dungeonMap = window; // initialize
     } else {
       const updateData = window.applyUpdate(this.dungeonMap);
+      // we should definetely not use the hardcoded values here...
       this.dungeonMap = new NethackWindow({
         rows: 24, cols: 80, rowno: 21, colno: 80,
       }, windowIds.NHW_MAP, updateData);

@@ -96,7 +96,22 @@ After input is completed, the bindings will update the windows and emit events a
 
 ### NetHack game session
 
-The game session provides an interface to interact with the game. It handles the SSH session, input and updates, and provides abstraction over the NetHack windows. At the moment, the abstraction is basically non-existant. Interaction with dgamelaunch is currently **hardcoded** to the Hardfought server. If you want to connect to, say, NAO instead, you should edit the `loginSSH` function of the [NethackSession](./nethacksession.js). 
+The game session provides an interface to interact with the game. It handles the SSH session, input and updates, and provides abstraction over the NetHack windows. The method `loginSSH` creates a connection to a NetHack public server. Currently supported servers are:
+
++ `'nao'`:          nethack@nethack.alt.org
++ `'hardfoughtEU'`: nethack@eu.hardfought.org
++ `'hardfoughtUS'`: nethack@us.hardfought.org
++ `'hardfoughtAU'`: nethack@au.hardfought.org
+
+Feel free to add other servers to `config.json`.
+
+---
+
+```javascript
+  const nethackSession = new NethackSession();
+  // connect to HDF-EU
+  await nethackSession.loginSSH('hardfoughtEU', 'dglUsername', 'dglPassword');
+```
 
 ### Example
 

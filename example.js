@@ -1,11 +1,11 @@
 const NethackSession = require('./nethacksession');
-const { username, password, server } = require('./config');
+const { username, password } = require('./config');
 
 const nethackSession = new NethackSession();
 
 // lazy top-level await
 (async () => {
-  await nethackSession.loginSSH(username, password, server);
+  await nethackSession.loginSSH('hardfoughtEU', username, password);
   if (!nethackSession.connected) {
     throw new Error('Couldn\'t connect!');
   }
