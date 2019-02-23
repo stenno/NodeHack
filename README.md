@@ -6,7 +6,9 @@ This library aims to provide low-level, easily extendable bindings to the roguel
 
 ## Requirements
 
-Currently, the library relies on the [vt_tiledata](https://nethackwiki.com/wiki/vt_tiledata) compile-time option to be enabled. At the moment, only server play is supported. Implementing a local connection should be trivial, though. Luckily both the [NAO](https://nethack.alt.org) and the [Hardfought](https://hardfought.org) servers have it enabled. Make sure to set your DGL username and password in the [config.json](./config.json) file. Even though screen resizing is technically supported, it is thoroughly untested and the standard 80 columns x 24 rows layout should be used. This repository includes a [.nethackrc](./.nethackrc) file which is recommended for usage with the library. If you are feeling adventurous, play around with those options but expect it to break.
+Currently, the library relies on the [vt_tiledata](https://nethackwiki.com/wiki/vt_tiledata) compile-time option to be enabled. uckily both the [NAO](https://nethack.alt.org) and the [Hardfought](https://hardfought.org) public servers have it enabled. At the moment, only server play is supported, implementing a local connection should be trivial, though. Make sure to set your DGL username and password in the [config.json](./config.json) file. 
+
+Even though screen resizing is technically supported, it is thoroughly untested and the standard 80 columns x 24 rows layout should be used. This repository includes a [.nethackrc](./.nethackrc) file which is recommended for usage with the library. If you are feeling adventurous, play around with those options but expect it to break.
 
 ## Usage
 
