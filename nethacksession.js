@@ -1,8 +1,9 @@
 const { EventEmitter } = require('events');
+
 const Client = require('./client');
 const { NethackWindow, windowIds } = require('./nhwindow');
-
 const { servers } = require('./config');
+const Character = require('./character');
 
 module.exports = class NethackSession extends EventEmitter {
   constructor() {
@@ -13,6 +14,8 @@ module.exports = class NethackSession extends EventEmitter {
     this.messages = [];
     this.dungeonMap = null;
     this.currentText = '';
+    this.character = null;
+    this.statusBar = {};
   }
 
   async loginSSH(serverName, dglUsername, dglPassword) {
@@ -23,6 +26,7 @@ module.exports = class NethackSession extends EventEmitter {
       throw new Error(`Could not initialize PTY session: ${message}`);
     }
 
+    // TODO sanity checks
     const { sshHost, dglStartGame } = servers[serverName];
 
     try {
@@ -47,7 +51,9 @@ module.exports = class NethackSession extends EventEmitter {
 
     try {
       // character pick here?
-      this.windows = await client.doNHInput(' ');
+      // we are now 'in the game', first true input
+      this.character = new Character(dglUsername);
+      this.windows = await client.doNHInput('  ');
       this.connected = true;
       this.update();
     } catch ({ message }) {
@@ -116,7 +122,7 @@ module.exports = class NethackSession extends EventEmitter {
 
   updateMap() {
     // normalized
-    const window = this.getWindow('map');
+    const window = this.getMapWindow();
 
     if (this.dungeonMap === null) {
       this.dungeonMap = window; // initialize
@@ -130,16 +136,103 @@ module.exports = class NethackSession extends EventEmitter {
     this.emit('updatedMap', this.dungeonMap);
   }
 
+  updateStatusBar() {
+    const window = this.getStatusWindow();
+    const statusBar = window.toString(' ');
+
+    if (statusBar.trim() === '') {
+      // no update here, so we just return the old statusBar
+      this.emit('statusBarUpdated', this.statusBar);
+      return;
+    }
+
+    // Nodehack the Stripling \
+    // St:16 Dx:13 Co:17 In:8 Wi:13 Ch:8 Lawful lvl:1 $:0 HP:16(16) Pw:2(2) AC:6 Xp:1 T:1
+
+    const { name } = this.character;
+
+    // thanks to named capture groups we can be modular with our 'parsers'
+    // later, we can inject user-defined regexps
+    // we rely 'a bit' on names not containing ':'...
+
+    // player name the role title St: ...
+    const titleRegexp = new RegExp(`^${name} the (?<title>(.*?))(?=( *St:))`, 'i');
+    const { title } = titleRegexp.exec(statusBar).groups;
+
+    const attributeExpressions = [
+      /St:(?<strength>\d+(\/\d+)?)/,
+      /Dx:(?<dexterity>\d+)/,
+      /Co:(?<constitution>\d+)/,
+      /In:(?<intelligence>\d+)/,
+      /Wi:(?<wisdom>\d+)/,
+      /Ch:(?<charisma>\d+)/,
+    ];
+
+    const attributes = attributeExpressions.reduce((attrs, re) => ({
+      ...attrs, ...(re.exec(statusBar).groups),
+    }), {});
+
+    // the word that is followed by Ch: xx
+    const alignmentExpression = /(?<=Ch:(\d+)( *?))(?<alignment>\w+)/;
+    const { alignment } = alignmentExpression.exec(statusBar).groups;
+
+    const dungeonLevelExpression = /lvl:(?<dungeonLevel>\d+)/;
+    const { dungeonLevel } = dungeonLevelExpression.exec(statusBar).groups;
+
+    const goldExpression = /\$:(?<gold>\d+)/;
+    const { gold } = goldExpression.exec(statusBar).groups;
+
+    const hpExpression = /HP:(?<hp>-?\d+)\((?<maxHP>-?\d+)\)/;
+    const { hp, maxHP } = hpExpression.exec(statusBar).groups;
+
+    const pwExpression = /Pw:(?<pw>\d+)\((?<maxPw>\d+)\)/;
+    const { pw, maxPw } = pwExpression.exec(statusBar).groups;
+
+    const acExpression = /AC:(?<ac>-?\d+)/;
+    const { ac } = acExpression.exec(statusBar).groups;
+
+    const xpExpression = /Xp:(?<xp>\d+)/;
+    const { xp } = xpExpression.exec(statusBar).groups;
+
+    // handles overflow, thanks Khaos
+    const turnsExpression = /T:(?<turns>-?\d+)/;
+    const { turns } = turnsExpression.exec(statusBar).groups;
+
+    // this expects status warnings to be the last elements in the botl
+    const statusWarningsExpression = /(?<=T:-?(\d+) )(?<warnings>(.*))(?= *)$/;
+    const rawStatusWarnings = statusWarningsExpression.exec(statusBar).groups.warnings;
+    const statusWarnings = rawStatusWarnings.trim().split(' ');
+
+    this.statusBar = {
+      title,
+      attributes,
+      alignment,
+      dungeonLevel,
+      gold,
+      hp,
+      maxHP,
+      pw,
+      maxPw,
+      ac,
+      xp,
+      turns,
+      statusWarnings,
+    };
+    this.emit('updatedStatusBar', this.statusBar);
+  }
+
   async doInput(str) {
     const windows = await this.client.doNHInput(str);
     this.windows = windows;
     this.update();
-    this.emit('updatedAll');
   }
 
   update() {
     this.updateMessages();
+    this.updateStatusBar();
+    this.updateText();
     this.updateMap();
+    this.emit('updatedAll');
   }
 
   close() {

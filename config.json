@@ -1,6 +1,6 @@
 {
-  "username": "stenno",
-  "password": "not my password",
+  "username": "nodehack",
+  "password": "nodehack",
   "servers": {
     "nao": {
       "sshHost": "nethack@alt.org",

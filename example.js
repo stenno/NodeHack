@@ -18,15 +18,16 @@ const nethackSession = new NethackSession();
   await nethackSession.doInput('i');
   const menuWindow = nethackSession.getMenuWindow();
   console.log(menuWindow.toChunkedString(''));
+
+  nethackSession.once('updatedStatusBar', (updatedStatusBar) => {
+    console.log(updatedStatusBar);
+  });
   // pressing escape to abort
   await nethackSession.doInput(String.fromCharCode(0x1b)); // escape
 
-  const statuswindow = nethackSession.getStatusWindow();
-  console.log(statuswindow.toString(' '));
   // yes, we want to Save
   await nethackSession.doInput('S');
   await nethackSession.doInput('y');
   nethackSession.close();
   // print all messages
-  console.log(nethackSession.messages);
 })();

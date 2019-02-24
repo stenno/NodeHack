@@ -239,6 +239,7 @@ class NethackWindow {
     return rowStrings;
   }
 
+  // lazy
   toChunkedString(emptySymbol = '') {
     const dataWindow = this.chunkedWindow();
     const window = dataWindow.map(row => row.map(cell => cell.sym.padStart(1, emptySymbol)).join('')).join('\n');

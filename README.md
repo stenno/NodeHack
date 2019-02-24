@@ -4,11 +4,13 @@
 
 This library aims to provide low-level, easily extendable bindings to the roguelike [NetHack](https://nethack.org) 3.6.1.
 
+
 ## Requirements
 
 Currently, the library relies on the [vt_tiledata](https://nethackwiki.com/wiki/vt_tiledata) compile-time option to be enabled. Luckily both the [NAO](https://nethack.alt.org) and the [Hardfought](https://hardfought.org) public servers have it enabled. At the moment, only server play is supported, implementing a local connection should be trivial, though. Make sure to set your DGL username and password in the [config.json](./config.json) file. 
 
 Even though screen resizing is technically supported, it is thoroughly untested and the standard 80 columns x 24 rows layout should be used. This repository includes a [.nethackrc](./.nethackrc) file which is recommended for usage with the library. If you are feeling adventurous, play around with those options but expect it to break.
+
 
 ## Usage
 
@@ -26,9 +28,9 @@ NetHack writes its data into one of six game windows, which are exposed by the b
 
 2.  **Status**
 
-    The status window, also known as botl (bottom line), contains the name of the character, their attributes and game information
+    The status window, also known as botl (bottom line), contains the name of the character, their attributes and game information.
 
-    > [Stenno the Warrior            ] St:18/12 Dx:15 Co:19 In:10 Wi:10 Ch:13 Lawful   lvl:15 $:0 HP:142(142) Pw:20(20) AC:-11 Xp:14 T:10160 Satiated
+    > Nodehack the Stripling        St:16 Dx:13 Co:17 In:8 Wi:13 Ch:8 Lawful           lvl:1 $:0 HP:16(16) Pw:2(2) AC:6 Xp:1 T:1
 
 3.  **Map**
 
@@ -63,7 +65,7 @@ The bindings expose those windows in a game session:
   console.log(statusWindow.toString(' '));
 ```
 
-Please note that windows will not update by themselves. You have to fetch each window again after each input (if you need it).
+Please note that windows will not update by themselves. You have to fetch each window again after each update (if you need it).
 Likewise, mutating window data will **not** reflect on the actual session.
 
 ### Input
@@ -83,7 +85,8 @@ Input is done via the `doInput` method of a game session, which returns a promis
 After input is completed, the bindings will update the windows and emit events after updating:
 
 ```javascript
-  nethackSession.on('updatedMap', (updatedMap) => {
+  nethackSession.once('updatedStatusBar', (updatedStatusBar) => {
+    console.log(updatedStatusBar)
     // do something with the updated map here
   });
 ```
@@ -93,8 +96,6 @@ After input is completed, the bindings will update the windows and emit events a
     console.log(`The last received message is ${ lastMessage }`);
   });
 ```
-
-
 
 ### NetHack game session
 
@@ -117,7 +118,8 @@ Feel free to add other servers to `config.json`.
 
 ### Example
 
-See example.js for an example NetHack session.
+See [example.js](./example.js) for an example NetHack session.
+
 
 ## Notes
 
@@ -125,14 +127,15 @@ This library _should_ work out of the box at the low level for both [xNetHack](h
 
 If you are connecting with high lag, adjust the `WAITING_DELAY` constant in [client.js](./client.js) (default: 250 ms).
 
+
 ## TODO
 
-+ Proper abstraction of statuswindow, menuwindows (including menu pages) and map window
-+ Proper updating of statuswindow
-+ Proper abstraction of the player character
-+ Handling of `--More--` prompts
-+ Mapping of tiledata ID to an abstract tile square
-+ Configuration of DGL interaction
-+ Local play
-+ Proper JSDoc
++ [ ] Proper abstraction of statuswindow, menuwindows (including menu pages) and map window
++ [ ] Proper abstraction of the player character
++ [ ] Handling of `--More--` prompts
++ [ ] Handling of character creation if neccessary
++ [ ] Mapping of tiledata ID to an abstract tile square
++ [x] Configuration of DGL interaction
++ [ ] Local play
++ [ ] Proper JSDoc
 + ...
