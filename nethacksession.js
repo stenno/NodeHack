@@ -1,12 +1,15 @@
 const { EventEmitter } = require('events');
 
+const _ = require('lodash'); // eslint-disable-line import/no-extraneous-dependencies
+
 const Client = require('./client');
 const { NethackWindow, windowIds } = require('./nhwindow');
 const { servers } = require('./config');
+const expressions = require('./expressions');
 const Character = require('./character');
 
 module.exports = class NethackSession extends EventEmitter {
-  constructor() {
+  constructor(customExpressions = {}) {
     super();
     this.client = new Client();
     this.windows = [];
@@ -16,6 +19,8 @@ module.exports = class NethackSession extends EventEmitter {
     this.currentText = '';
     this.character = null;
     this.statusBar = {};
+    this.currentMenu = { items: [], page: 0, numPages: 0 };
+    this.customExpressions = customExpressions;
   }
 
   async loginSSH(serverName, dglUsername, dglPassword) {
@@ -109,13 +114,15 @@ module.exports = class NethackSession extends EventEmitter {
     return this.getWindow('menu');
   }
 
-  updateMessages() {
+  // message parsing TBI
+  updateMessages(customExpressions) { // eslint-disable-line no-unused-vars
     const window = this.getMessageWindow();
     this.messages = [...this.messages, window.toString('')];
     this.emit('updatedMessages', this.messages.slice(-1));
   }
 
-  updateText() {
+  // text parsing TBI
+  updateText(customExpressions) { // eslint-disable-line no-unused-vars
     // do nothing for now
     this.emit('updatedText');
   }
@@ -136,7 +143,7 @@ module.exports = class NethackSession extends EventEmitter {
     this.emit('updatedMap', this.dungeonMap);
   }
 
-  updateStatusBar() {
+  updateStatusBar(customExpressions = {}) {
     const window = this.getStatusWindow();
     const statusBar = window.toString(' ');
 
@@ -146,92 +153,74 @@ module.exports = class NethackSession extends EventEmitter {
       return;
     }
 
-    // Nodehack the Stripling \
-    // St:16 Dx:13 Co:17 In:8 Wi:13 Ch:8 Lawful lvl:1 $:0 HP:16(16) Pw:2(2) AC:6 Xp:1 T:1
-
-    const { name } = this.character;
-
-    // thanks to named capture groups we can be modular with our 'parsers'
-    // later, we can inject user-defined regexps
-    // we rely 'a bit' on names not containing ':'...
-
-    // player name the role title St: ...
-    const titleRegexp = new RegExp(`^${name} the (?<title>(.*?))(?=( *St:))`, 'i');
-    const { title } = titleRegexp.exec(statusBar).groups;
-
-    const attributeExpressions = [
-      /St:(?<strength>\d+(\/\d+)?)/,
-      /Dx:(?<dexterity>\d+)/,
-      /Co:(?<constitution>\d+)/,
-      /In:(?<intelligence>\d+)/,
-      /Wi:(?<wisdom>\d+)/,
-      /Ch:(?<charisma>\d+)/,
-    ];
-
-    const attributes = attributeExpressions.reduce((attrs, re) => ({
-      ...attrs, ...(re.exec(statusBar).groups),
-    }), {});
-
-    // the word that is followed by Ch: xx
-    const alignmentExpression = /(?<=Ch:(\d+)( *?))(?<alignment>\w+)/;
-    const { alignment } = alignmentExpression.exec(statusBar).groups;
-
-    const dungeonLevelExpression = /lvl:(?<dungeonLevel>\d+)/;
-    const { dungeonLevel } = dungeonLevelExpression.exec(statusBar).groups;
-
-    const goldExpression = /\$:(?<gold>\d+)/;
-    const { gold } = goldExpression.exec(statusBar).groups;
-
-    const hpExpression = /HP:(?<hp>-?\d+)\((?<maxHP>-?\d+)\)/;
-    const { hp, maxHP } = hpExpression.exec(statusBar).groups;
-
-    const pwExpression = /Pw:(?<pw>\d+)\((?<maxPw>\d+)\)/;
-    const { pw, maxPw } = pwExpression.exec(statusBar).groups;
-
-    const acExpression = /AC:(?<ac>-?\d+)/;
-    const { ac } = acExpression.exec(statusBar).groups;
-
-    const xpExpression = /Xp:(?<xp>\d+)/;
-    const { xp } = xpExpression.exec(statusBar).groups;
-
-    // handles overflow, thanks Khaos
-    const turnsExpression = /T:(?<turns>-?\d+)/;
-    const { turns } = turnsExpression.exec(statusBar).groups;
-
-    // this expects status warnings to be the last elements in the botl
-    const statusWarningsExpression = /(?<=T:-?(\d+) )(?<warnings>(.*))(?= *)$/;
-    const rawStatusWarnings = statusWarningsExpression.exec(statusBar).groups.warnings;
-    const statusWarnings = rawStatusWarnings.trim().split(' ');
-
-    this.statusBar = {
-      title,
-      attributes,
-      alignment,
-      dungeonLevel,
-      gold,
-      hp,
-      maxHP,
-      pw,
-      maxPw,
-      ac,
-      xp,
-      turns,
-      statusWarnings,
+    const statusExpressions = {
+      ...expressions.statusBar,
+      ...this.customExpressions.statusBar,
+      ...customExpressions,
     };
+
+    const updatedStatusBar = Object.values(statusExpressions).reduce((result, expression) => {
+      const parsedItem = expression.exec(statusBar);
+      return (parsedItem === null) ? result : { ...result, ...parsedItem.groups };
+    }, {});
+    this.statusBar = updatedStatusBar;
     this.emit('updatedStatusBar', this.statusBar);
   }
 
-  async doInput(str) {
-    const windows = await this.client.doNHInput(str);
-    this.windows = windows;
-    this.update();
+  updateMenu(customExpressions = {}) {
+    const window = this.getMenuWindow();
+    const menuPage = window.toChunkedString('').split('\n').map(row => row.trim()).filter(row => row !== '');
+
+    if (menuPage.length === 0) {
+      this.currentMenu = { items: [], page: 0, numPages: 0 };
+      this.emit('updatedMenu', this.currentMenu);
+      return this.currentMenu;
+    }
+    const menuItemExpressions = {
+      ...expressions.menuItem,
+      ...this.customExpressions.menuItem,
+      ...customExpressions,
+    };
+
+    const items = menuPage.slice(0, -1).map((menuItem) => {
+      const parsedMenuItem = Object.values(menuItemExpressions).reduce((result, expression) => {
+        const parsedItem = expression.exec(menuItem);
+        return (parsedItem === null) ? result : { ...result, ...parsedItem.groups };
+      }, {});
+      return parsedMenuItem;
+    });
+
+    const lastLine = menuPage.slice(-1);
+
+    // lazy
+    const menu = { items: items.filter(item => !_.isEmpty(item)) };
+
+    // (end) indicates single page
+    if (lastLine === '(end)') {
+      this.currentMenu = { ...menu, page: 0, numPages: 1 };
+      this.emit('updatedMenu', this.currentMenu);
+      return this.currentMenu;
+    }
+
+    // move this to expressions.js too?
+    const { page, numPages } = /^\((?<page>\d+) of (?<numPages>\d+)\)$/.exec(lastLine).groups;
+    this.currentMenu = { ...menu, page, numPages };
+    this.emit('updatedMenu', this.currentMenu);
+    return this.currentMenu;
   }
 
-  update() {
-    this.updateMessages();
-    this.updateStatusBar();
-    this.updateText();
+  async doInput(str, customExpressions = {}) {
+    const windows = await this.client.doNHInput(str);
+    this.windows = windows;
+    this.update(customExpressions);
+  }
+
+  update(customExpressions = {}) {
+    this.updateMessages(customExpressions.messages);
+    this.updateStatusBar(customExpressions.statusBar);
+    this.updateText(customExpressions.text);
     this.updateMap();
+    this.updateMenu(customExpressions.menu);
     this.emit('updatedAll');
   }
 

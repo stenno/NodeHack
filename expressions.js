@@ -1,0 +1,26 @@
+module.exports = {
+  statusBar: {
+    title: /^(\w+) the (?<title>(.*?))(?=( *St:))/,
+    strength: /St:(?<strength>\d+(\/\d+)?)/,
+    dexterity: /Dx:(?<dexterity>\d+)/,
+    constitution: /Co:(?<constitution>\d+)/,
+    intelligence: /In:(?<intelligence>\d+)/,
+    wisdom: /Wi:(?<wisdom>\d+)/,
+    charisma: /Ch:(?<charisma>\d+)/,
+    alignment: /(?<=Ch:(\d+)( *?))(?<alignment>\w+)/,
+    dungeonLevel: /lvl:(?<dungeonLevel>\d+)/,
+    gold: /\$:(?<gold>\d+)/,
+    hp: /HP:(?<hp>-?\d+)/,
+    maxHP: /(?<=(HP:(-?\d+)))\((?<maxHP>-?\d+)\)/,
+    pw: /Pw:(?<pw>\d+)/,
+    maxPw: /(?<=(Pw:(\d+)))\((?<maxPw>\d+)\)/,
+    ac: /AC:(?<ac>-?\d+)/,
+    xp: /Xp:(?<xp>\d+)/,
+    turns: /T:(?<turns>-?\d+)/,
+    warnings: /(?<=T:-?(\d+)( +))(?<warnings>(.*?))(?=( *)$)/,
+  },
+  menuItem: {
+    letter: /^(?<letter>.) - /,
+    item: /(?<=^. - )(?<item>(.*))/,
+  },
+};

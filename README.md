@@ -116,6 +116,27 @@ Feel free to add other servers to `config.json`.
   await nethackSession.loginSSH('hardfoughtEU', 'dglUsername', 'dglPassword');
 ```
 
+### Custom parse expressions
+
+NodeHack uses regular expressions to parse menus, the status bar etc. See [expressions.js](./expressions.js) for a list of built-in expressions. These built-in expressions can be overriden and extended during runtime. The following example injects a custom menu expression to obtain all worn items on the current inventory page once. 
+
+```javascript
+  const customExpressions = {
+    menu: {
+      worn: /\((being (?<worn>worn))\)/,
+    },
+  };
+
+  nethackSession.once('updatedMenu', ({ items, page, numPages }) => {
+    const wornItems = items.filter(item => typeof item.worn !== 'undefined');
+    console.log(page, numPages, wornItems);
+  });
+
+  await nethackSession.doInput('i', customExpressions);
+```
+
+A more detailed explanation about custom parse expressions will follow soon.
+
 ### Example
 
 See [example.js](./example.js) for an example NetHack session.
@@ -130,7 +151,9 @@ If you are connecting with high lag, adjust the `WAITING_DELAY` constant in [cli
 
 ## TODO
 
-+ [ ] Proper abstraction of statuswindow, menuwindows (including menu pages) and map window
++ [x] Proper abstraction of statuswindow
++ [x] Proper abstraction of menuwindows
++ [ ] Proper abstraction of map window
 + [ ] Proper abstraction of the player character
 + [ ] Handling of `--More--` prompts
 + [ ] Handling of character creation if neccessary
@@ -138,4 +161,3 @@ If you are connecting with high lag, adjust the `WAITING_DELAY` constant in [cli
 + [x] Configuration of DGL interaction
 + [ ] Local play
 + [ ] Proper JSDoc
-+ ...
