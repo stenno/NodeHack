@@ -220,7 +220,7 @@ module.exports = class NethackSession extends EventEmitter {
     this.updateStatusBar(customExpressions.statusBar);
     this.updateText(customExpressions.text);
     this.updateMap();
-    this.updateMenu(customExpressions.menu);
+    this.updateMenu(customExpressions.menuItem);
     this.emit('updatedAll');
   }
 

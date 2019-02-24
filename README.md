@@ -122,7 +122,7 @@ NodeHack uses regular expressions to parse menus, the status bar etc. See [expre
 
 ```javascript
   const customExpressions = {
-    menu: {
+    menuItem: {
       worn: /\((being (?<worn>worn))\)/,
     },
   };

@@ -14,7 +14,7 @@ const nethackSession = new NethackSession();
   // inject custom inventory handler: all worn items on the inventory page
 
   const customExpressions = {
-    menu: {
+    menuItem: {
       worn: /\((being (?<worn>worn))\)/,
     },
   };
