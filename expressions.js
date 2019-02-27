@@ -22,5 +22,9 @@ module.exports = {
   menuItem: {
     letter: /^(?<letter>.) - /,
     item: /(?<=^. - )(?<item>(.*))/,
+    category: /^(?<category>\w{2,}.*)/,
+  },
+  message: {
+    more: /--(?<more>More)--$/,
   },
 };

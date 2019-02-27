@@ -1,6 +1,6 @@
 {
   "username": "nodehack",
-  "password": "hodenack",
+  "password": "not my password",
   "servers": {
     "nao": {
       "sshHost": "nethack@alt.org",
@@ -17,6 +17,10 @@
     "hardfoughtAU": {
       "sshHost": "nethack@au.hardfought.org",
       "dglStartGame": "v"
+    },
+    "xnhHardfoughEU": {
+      "sshHost": "nethack@eu.hardfought.org",
+      "dglStartGame": "x"
     }
   }
 }

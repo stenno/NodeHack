@@ -8,6 +8,17 @@ const { servers } = require('./config');
 const expressions = require('./expressions');
 const Character = require('./character');
 
+const parseString = (str, parserExpressions) => {
+  const parsed = _.mapValues(parserExpressions, (expression, key) => {
+    const result = expression.exec(str);
+    if (result === null) {
+      return null;
+    }
+    return result.groups[key];
+  });
+  return parsed;
+};
+
 module.exports = class NethackSession extends EventEmitter {
   constructor(customExpressions = {}) {
     super();
@@ -114,17 +125,36 @@ module.exports = class NethackSession extends EventEmitter {
     return this.getWindow('menu');
   }
 
+  // the updateFoo functions need serious refactoring
   // message parsing TBI
-  updateMessages(customExpressions) { // eslint-disable-line no-unused-vars
+  updateMessage(customExpressions) {
     const window = this.getMessageWindow();
-    this.messages = [...this.messages, window.toString('')];
-    this.emit('updatedMessages', this.messages.slice(-1));
+    const message = window.toString('').trim();
+    if (message === '') {
+      this.emit('updatedMessages', '');
+      return '';
+    }
+
+    const messageExpressions = {
+      ...expressions.message,
+      ...this.customExpressions.message,
+      ...customExpressions,
+    };
+
+    const parsedMessage = parseString(message, messageExpressions);
+
+    this.messages = [...this.messages, message];
+    this.emit('updatedMessages', { message, parsedMessage });
+    return parsedMessage;
   }
 
   // text parsing TBI
   updateText(customExpressions) { // eslint-disable-line no-unused-vars
     // do nothing for now
-    this.emit('updatedText');
+    const window = this.getTextWindow();
+    const text = window.toString('').trim();
+    this.emit('updatedText', text);
+    return text;
   }
 
   updateMap() {
@@ -141,16 +171,17 @@ module.exports = class NethackSession extends EventEmitter {
       }, windowIds.NHW_MAP, updateData);
     }
     this.emit('updatedMap', this.dungeonMap);
+    return this.dungeonMap;
   }
 
-  updateStatusBar(customExpressions = {}) {
+  updateStatus(customExpressions = {}) {
     const window = this.getStatusWindow();
     const statusBar = window.toString(' ');
 
     if (statusBar.trim() === '') {
       // no update here, so we just return the old statusBar
       this.emit('statusBarUpdated', this.statusBar);
-      return;
+      return this.statusBar;
     }
 
     const statusExpressions = {
@@ -159,12 +190,11 @@ module.exports = class NethackSession extends EventEmitter {
       ...customExpressions,
     };
 
-    const updatedStatusBar = Object.values(statusExpressions).reduce((result, expression) => {
-      const parsedItem = expression.exec(statusBar);
-      return (parsedItem === null) ? result : { ...result, ...parsedItem.groups };
-    }, {});
+    const updatedStatusBar = parseString(statusBar, statusExpressions);
+
     this.statusBar = updatedStatusBar;
     this.emit('updatedStatusBar', this.statusBar);
+    return this.statusBar;
   }
 
   updateMenu(customExpressions = {}) {
@@ -176,22 +206,16 @@ module.exports = class NethackSession extends EventEmitter {
       this.emit('updatedMenu', this.currentMenu);
       return this.currentMenu;
     }
+
     const menuItemExpressions = {
       ...expressions.menuItem,
       ...this.customExpressions.menuItem,
       ...customExpressions,
     };
 
-    const items = menuPage.slice(0, -1).map((menuItem) => {
-      const parsedMenuItem = Object.values(menuItemExpressions).reduce((result, expression) => {
-        const parsedItem = expression.exec(menuItem);
-        return (parsedItem === null) ? result : { ...result, ...parsedItem.groups };
-      }, {});
-      return parsedMenuItem;
-    });
-
+    const rawMenuItems = menuPage.slice(0, -1);
+    const items = rawMenuItems.map(menuItem => parseString(menuItem, menuItemExpressions));
     const lastLine = menuPage.slice(-1);
-
     // lazy
     const menu = { items: items.filter(item => !_.isEmpty(item)) };
 
@@ -201,7 +225,6 @@ module.exports = class NethackSession extends EventEmitter {
       this.emit('updatedMenu', this.currentMenu);
       return this.currentMenu;
     }
-
     // move this to expressions.js too?
     const { page, numPages } = /^\((?<page>\d+) of (?<numPages>\d+)\)$/.exec(lastLine).groups;
     this.currentMenu = { ...menu, page, numPages };
@@ -216,12 +239,16 @@ module.exports = class NethackSession extends EventEmitter {
   }
 
   update(customExpressions = {}) {
-    this.updateMessages(customExpressions.messages);
-    this.updateStatusBar(customExpressions.statusBar);
-    this.updateText(customExpressions.text);
-    this.updateMap();
-    this.updateMenu(customExpressions.menuItem);
-    this.emit('updatedAll');
+    const updatedScreen = {
+      message: this.updateMessage(customExpressions.message),
+      status: this.updateStatus(customExpressions.statusBar),
+      text: this.updateText(customExpressions.text),
+      map: this.updateMap(customExpressions.map),
+      menu: this.updateMenu(customExpressions.menu),
+    };
+
+    this.emit('updatedAll', updatedScreen);
+    return updatedScreen;
   }
 
   close() {
