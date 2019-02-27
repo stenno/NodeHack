@@ -122,16 +122,17 @@ NodeHack uses regular expressions to parse menus, the status bar etc. See [expre
 
 ```javascript
   const customExpressions = {
-    menuItem: {
+    menu: {
       worn: /\((being (?<worn>worn))\)/,
     },
   };
 
-  nethackSession.once('updatedMenu', ({ items, page, numPages }) => {
-    const wornItems = items.filter(item => typeof item.worn !== 'undefined');
-    console.log(page, numPages, wornItems);
+  nethackSession.once('updatedAll', ({ menu }) => {
+    const { items, page, numPages } = menu;
+    const wornItems = items.filter(item => item.worn !== null);
+    console.log(`Worn items on inventory page ${page} of ${numPages}`);
+    console.log(wornItems);
   });
-
   await nethackSession.doInput('i', customExpressions);
 ```
 
