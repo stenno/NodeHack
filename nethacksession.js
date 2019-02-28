@@ -215,16 +215,25 @@ module.exports = class NethackSession extends EventEmitter {
 
     const rawMenuItems = menuPage.slice(0, -1);
     const items = rawMenuItems.map(menuItem => parseString(menuItem, menuItemExpressions));
-    const lastLine = menuPage.slice(-1);
+    const [lastLine] = menuPage.slice(-1);
     // lazy
     const menu = { items: items.filter(item => !_.isEmpty(item)) };
 
-    // (end) indicates single page
-    if (lastLine === '(end)') {
-      this.currentMenu = { ...menu, page: 0, numPages: 1 };
+    // refactor?
+
+    if (typeof lastLine === 'undefined') {
+      this.currentMenu = [];
       this.emit('updatedMenu', this.currentMenu);
       return this.currentMenu;
     }
+
+    // (end) indicates single page
+    if (lastLine.trim() === '(end)') {
+      this.currentMenu = { ...menu, page: 1, numPages: 1 };
+      this.emit('updatedMenu', this.currentMenu);
+      return this.currentMenu;
+    }
+
     // move this to expressions.js too?
     const { page, numPages } = /^\((?<page>\d+) of (?<numPages>\d+)\)$/.exec(lastLine).groups;
     this.currentMenu = { ...menu, page, numPages };
@@ -235,7 +244,7 @@ module.exports = class NethackSession extends EventEmitter {
   async doInput(str, customExpressions = {}) {
     const windows = await this.client.doNHInput(str);
     this.windows = windows;
-    this.update(customExpressions);
+    return this.update(customExpressions);
   }
 
   update(customExpressions = {}) {

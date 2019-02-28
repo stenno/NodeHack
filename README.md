@@ -127,13 +127,12 @@ NodeHack uses regular expressions to parse menus, the status bar etc. See [expre
     },
   };
 
-  nethackSession.once('updatedAll', ({ menu }) => {
-    const { items, page, numPages } = menu;
-    const wornItems = items.filter(item => item.worn !== null);
-    console.log(`Worn items on inventory page ${page} of ${numPages}`);
-    console.log(wornItems);
-  });
-  await nethackSession.doInput('i', customExpressions);
+  const { menu } = await nethackSession.doInput('i', customExpressions);
+  const { items, page, numPages } = menu;
+  const wornItems = items.filter(item => item.worn !== null);
+  
+  console.log(`Worn items on inventory page ${page} of ${numPages}`);
+  console.log(wornItems);
 ```
 
 A more detailed explanation about custom parse expressions will follow soon.
