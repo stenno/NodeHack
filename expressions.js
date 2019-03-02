@@ -25,6 +25,7 @@ module.exports = {
     category: /^(?<category>\w{2,}.*)/,
   },
   message: {
+    raw: /(?<raw>.*)/,
     more: /--(?<more>More)--$/,
   },
 };

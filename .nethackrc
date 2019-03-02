@@ -7,3 +7,4 @@ OPTIONS=pickup_types:$/=?!
 OPTIONS=boulder:0
 OPTIONS=runmode:teleport
 OPTIONS=number_pad:0
+OPTIONS=msghistory:20

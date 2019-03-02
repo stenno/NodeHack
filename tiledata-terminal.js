@@ -23,20 +23,17 @@ module.exports = class TiledataTerminal extends AnsiTerminal {
 
     this.waiting = false;
     this.currentWindow = 0;
+    this.currentGlyph = null;
+    this.currentEffect = null;
 
     // monkeypatch inst_c to handle CSI sequences for vt_tiledata
     this.old_inst_c = this.inst_c;
     this.inst_c = (collected, params, flag) => {
-      const oldCell = this.cloneCurrentCell();
-      oldCell.tilesWindow = +this.currentWindow; // cast to Number
-      this.setCurrentCell(oldCell);
-
       if (flag === 'z') {
         this.TILE(params);
       } else {
         this.old_inst_c(collected, params, flag);
       }
-      // do we have to do this first?
     };
 
     this.old_inst_p = this.inst_p;
@@ -47,6 +44,8 @@ module.exports = class TiledataTerminal extends AnsiTerminal {
       [...str].forEach((char) => {
         const oldCell = this.cloneCurrentCell();
         oldCell.tilesWindow = +this.currentWindow;
+        oldCell.glyph = this.currentGlyph;
+        oldCell.effect = this.currentEffect;
         this.setCurrentCell(oldCell);
         this.old_inst_p(char);
       });
@@ -93,14 +92,13 @@ module.exports = class TiledataTerminal extends AnsiTerminal {
   }
 
   handleStartGlyph(glyph, effect) {
-    const oldCell = this.cloneCurrentCell();
-    oldCell.glyph = +glyph; // cast to Number
-    oldCell.effect = +effect; // cast to Number
-    this.setCurrentCell(oldCell);
+    this.currentGlyph = +glyph;
+    this.currentEffect = +effect;
   }
 
   handleEndGlyph() {  // eslint-disable-line
-    // do nothing
+    this.currentGlyph = null;
+    this.currentEffect = null;
   }
 
   handleSelectWindow(windowId) {
@@ -131,7 +129,7 @@ module.exports = class TiledataTerminal extends AnsiTerminal {
       const {
         c: sym, glyph, effect, tilesWindow,
       } = cell;
-      const attributes = cell.getAttributes();
+      const attributes = cell.getJSONAttributes();
       return ({
         sym, glyph, effect, window: tilesWindow, attributes, row, col,
       });

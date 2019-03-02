@@ -39,7 +39,7 @@ const coreTTYWindows = [{
   id: windowIds.NHW_MESSAGE,
   description: 'Message window, 1 line long, very wide, top of screen',
   resize: () => ({
-    rows: 1, cols: 0, maxRows: 0, maxCols: 0, offset: { row: 0, col: 0 },
+    rows: 20, cols: 0, maxRows: 0, maxCols: 0, offset: { row: 0, col: 0 },
   }),
 }, {
   name: 'status',

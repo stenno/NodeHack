@@ -130,11 +130,6 @@ module.exports = class NethackSession extends EventEmitter {
   updateMessage(customExpressions) {
     const window = this.getMessageWindow();
     const message = window.toString('').trim();
-    if (message === '') {
-      this.emit('updatedMessages', '');
-      return '';
-    }
-
     const messageExpressions = {
       ...expressions.message,
       ...this.customExpressions.message,
@@ -241,10 +236,15 @@ module.exports = class NethackSession extends EventEmitter {
     return this.currentMenu;
   }
 
-  async doInput(str, customExpressions = {}) {
+  async doInput(str, customExpressions = {}, handleMore = true) {
     const windows = await this.client.doNHInput(str);
     this.windows = windows;
-    return this.update(customExpressions);
+    const parsedWindows = this.update(customExpressions);
+    if (handleMore === false || parsedWindows.message.more === null) {
+      return [parsedWindows];
+    }
+    const nextMoreWindows = await this.doInput(' ', customExpressions, true);
+    return [...nextMoreWindows, parsedWindows];
   }
 
   update(customExpressions = {}) {

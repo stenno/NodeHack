@@ -1,0 +1,5 @@
+// https://github.com/NetHack/NetHack/blob/af42273b0201c527cf487e15233d13b69891db7c/include/display.h#L237
+
+monsters: 393,
+objects: 455, // 848
+other: 231

@@ -17,7 +17,7 @@ const nethackSession = new NethackSession();
       worn: /\((being (?<worn>worn))\)/,
     },
   };
-  const { menu, status } = await nethackSession.doInput('i', customExpressions);
+  const [{ menu, status }] = await nethackSession.doInput('i', customExpressions);
   const { items, page, numPages } = menu;
   const { strength, warnings, turns } = status;
   // all items with the attribute 'worn' matched the custom expression
@@ -27,11 +27,14 @@ const nethackSession = new NethackSession();
   console.log(`Player strength: ${strength}`);
   console.log(`Status warnings: ${warnings}`);
   console.log(`Current turncount: ${turns}`);
+  // print map
+  
   // pressing escape to exit inventory menu
-  await nethackSession.doInput(String.fromCharCode(0x1b)); // escape
+  const [{ map }] = await nethackSession.doInput(String.fromCharCode(0x1b)); // escape
+  console.log(map.toChunkedString(' '));
+  // print map
   // yes, we want to Save
   await nethackSession.doInput('S');
   await nethackSession.doInput('y');
-  console.log(nethackSession.messages);
   nethackSession.close();
 })();
