@@ -40,7 +40,9 @@ NetHack writes its data into one of six game windows, which are exposed by the b
 
 Note that windows will not update by themselves. You have to fetch each window again after each update (if you need it).
 Likewise, mutating window data will **not** reflect on the actual session.
+
 ---
+
 The bindings expose those windows in a game session:
 ```javascript
   const statusWindow = nethackSession.getStatusWindow();

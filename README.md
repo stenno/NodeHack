@@ -16,7 +16,7 @@ Even though screen resizing is technically supported, it is thoroughly untested 
 
 ### Windows
 
-See [./docs/windows.md].
+See [docs/windows.md](./docs/windows.md).
 
 ### Input
 
@@ -105,7 +105,7 @@ If you are connecting with high lag, adjust the `WAITING_DELAY` constant in [cli
 + [x] Proper abstraction of menuwindows
 + [ ] Proper abstraction of map window
 + [ ] Proper abstraction of the player character
-+ [ ] Handling of `--More--` prompts
++ [x] Handling of `--More--` prompts
 + [ ] Handling of character creation if neccessary
 + [ ] Mapping of tiledata ID to an abstract tile square
 + [x] Configuration of DGL interaction
