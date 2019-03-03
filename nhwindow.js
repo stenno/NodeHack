@@ -213,6 +213,14 @@ class NethackWindow {
     return _.chunk(window, fullCols);
   }
 
+  getGlyphs() {
+    const { normalized, data } = this;
+    const window = normalized ? data : this.normalizedDataWindow();
+    return window.filter(cell => cell.glyphData).map(cell => ({
+      row: cell.row, col: cell.col, data: cell.glyphData,
+    }));
+  }
+
   applyUpdate(oldWindow) {
     // oldWindow should be same size as we
     // our data is expected to be normalized

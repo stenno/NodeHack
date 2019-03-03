@@ -3,6 +3,7 @@
 const { AnsiTerminal } = require('node-ansiterminal'); // eslint-disable-line import/no-extraneous-dependencies
 
 const { indexToCoords } = require('./helpers').windowHelpers;
+const tiles = require('./tiles.json');
 
 // may or may not be needed later (therefore disabled linter for now)
 // eslint-disable-next-line no-unused-vars
@@ -16,6 +17,8 @@ const tiledataSpecialFlags = {
   objpile: 0x40,
   bw_lava: 0x80,
 };
+
+const findTile = id => tiles.find(tile => tile.index === id);
 
 module.exports = class TiledataTerminal extends AnsiTerminal {
   constructor(cols, rows, scrollLength) {
@@ -131,7 +134,7 @@ module.exports = class TiledataTerminal extends AnsiTerminal {
       } = cell;
       const attributes = cell.getJSONAttributes();
       return ({
-        sym, glyph, effect, window: tilesWindow, attributes, row, col,
+        sym, glyph, glyphData: findTile(glyph), effect, window: tilesWindow, attributes, row, col,
       });
     });
 

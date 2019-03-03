@@ -19,16 +19,19 @@ const nethackSession = new NethackSession();
   };
   const [{ menu, status, map }] = await nethackSession.doInput('i', customExpressions);
   const { items, page, numPages } = menu;
-  const { strength, warnings, turns } = status;
+  const { turns } = status;
   // all items with the attribute 'worn' matched the custom expression
   const wornItems = items.filter(item => item.worn !== null).map(item => item.item);
   console.log(`Worn items on inventory page ${page} of ${numPages}`);
   console.log(wornItems);
-  console.log(`Player strength: ${strength}`);
-  console.log(`Status warnings: ${warnings}`);
   console.log(`Current turncount: ${turns}`);
   // print map
   console.log(map.toChunkedString(' '));
+  // find all objects on map by tile information
+  const objectsOnMap = map.getGlyphs()
+    .filter(glyph => glyph.data.section === 'objects')
+    .map(({ row, col, data }) => ({ row, col, name: data.name }));
+  console.log(objectsOnMap);
   // pressing escape to exit inventory menu
   await nethackSession.doInput(String.fromCharCode(0x1b)); // escape
   // yes, we want to Save

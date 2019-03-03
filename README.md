@@ -24,12 +24,12 @@ Input is done via the `doInput` method of a game session, which returns a promis
 
 ```javascript
   // eat something?
-  await nethackSession.doInput('e');
+  const screens = await nethackSession.doInput('e');
 ```
 
 ```javascript
   // execute `#version` extcommand
-  await nethackSession.doInput('#version\n');
+  const screens = await nethackSession.doInput('#version\n');
 ```
 
 After input is completed, the bindings will update the windows and emit events after updating:
@@ -47,6 +47,22 @@ After input is completed, the bindings will update the windows and emit events a
   });
 ```
 
+`doInput` will automatically handle `--More--` prompts by sending a whitespace. It will return a list of all parsed screens. For more information about nethack windows, see [docs/windows.md](./docs/windows.md).
+
+```javascript 
+  const screens = nethackSession.doInput('>'); // going downstairs
+  screens.forEach(({ menu, map }) => {
+    // do stuff
+  });
+```
+NodeHack maps tile glyph IDs:
+
+```javascript
+  const objectGlyphs = map.getGlyphs().filter(glyph => glyph.data.section === 'objects');
+  const objects = objectGlyphs.map(glyph => glyph.data.name);
+  console.log(objects);
+```
+
 ### NetHack game session
 
 The game session provides an interface to interact with the game. It handles the SSH session, input and updates, and provides abstraction over the NetHack windows. The method `loginSSH` creates a connection to a NetHack public server. Currently supported servers are:
@@ -57,8 +73,6 @@ The game session provides an interface to interact with the game. It handles the
 + `'hardfoughtAU'`: nethack@au.hardfought.org
 
 Feel free to add other servers to `config.json`.
-
----
 
 ```javascript
   const nethackSession = new NethackSession();
@@ -77,7 +91,7 @@ NodeHack uses regular expressions to parse menus, the status bar etc. See [expre
     },
   };
 
-  const { menu } = await nethackSession.doInput('i', customExpressions);
+  const [{ menu }] = await nethackSession.doInput('i', customExpressions);
   const { items, page, numPages } = menu;
   const wornItems = items.filter(item => item.worn !== null);
   
@@ -107,7 +121,7 @@ If you are connecting with high lag, adjust the `WAITING_DELAY` constant in [cli
 + [ ] Proper abstraction of the player character
 + [x] Handling of `--More--` prompts
 + [ ] Handling of character creation if neccessary
-+ [ ] Mapping of tiledata ID to an abstract tile square
++ [x] Mapping of tiledata ID to an abstract tile square
 + [x] Configuration of DGL interaction
 + [ ] Local play
 + [ ] Proper JSDoc
