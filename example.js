@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 const NethackSession = require('./nethacksession');
 const { username, password } = require('./config');
 
@@ -27,11 +29,9 @@ const nethackSession = new NethackSession();
   console.log(`Current turncount: ${turns}`);
   // print map
   console.log(map.toChunkedString(' '));
-  // find all objects on map by tile information
-  const objectsOnMap = map.getGlyphs()
-    .filter(glyph => glyph.data.section === 'objects')
-    .map(({ row, col, data }) => ({ row, col, name: data.name }));
-  console.log(objectsOnMap);
+  // find all pets on the map by tile information
+  const petsOnMap = map.getMonsterGlyphs().filter(glyph => glyph.effects.includes('pet'));
+  console.log(petsOnMap);
   // pressing escape to exit inventory menu
   await nethackSession.doInput(String.fromCharCode(0x1b)); // escape
   // yes, we want to Save

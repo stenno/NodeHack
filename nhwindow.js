@@ -216,9 +216,30 @@ class NethackWindow {
   getGlyphs() {
     const { normalized, data } = this;
     const window = normalized ? data : this.normalizedDataWindow();
+    // Object.keys(_.pickBy(effects, value => value));
     return window.filter(cell => cell.glyphData).map(cell => ({
-      row: cell.row, col: cell.col, data: cell.glyphData,
+      row: cell.row,
+      col: cell.col,
+      data: cell.glyphData,
+      effects: Object.keys(_.pickBy(cell.effectData, value => value)),
     }));
+  }
+
+  getSectionGlyphs(section) {
+    const glyphs = this.getGlyphs();
+    return glyphs.filter(glyph => glyph.data.section === section);
+  }
+
+  getMonsterGlyphs() {
+    return this.getSectionGlyphs('monsters');
+  }
+
+  getObjectGlyphs() {
+    return this.getSectionGlyphs('objects');
+  }
+
+  getOtherGlyphs() {
+    return this.getSectionGlyphs('other');
   }
 
   applyUpdate(oldWindow) {

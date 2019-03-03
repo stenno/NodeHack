@@ -1,13 +1,14 @@
 // we monkeypatch AnsiTerminal for vt_tiledata support
 // https://nethackwiki.com/wiki/Vt_tiledata
 const { AnsiTerminal } = require('node-ansiterminal'); // eslint-disable-line import/no-extraneous-dependencies
+const _ = require('lodash');
 
 const { indexToCoords } = require('./helpers').windowHelpers;
 const tiles = require('./tiles.json');
 
 // may or may not be needed later (therefore disabled linter for now)
 // eslint-disable-next-line no-unused-vars
-const tiledataSpecialFlags = {
+const specialFlags = {
   corpse: 0x01,
   invis: 0x02,
   detect: 0x04,
@@ -19,6 +20,9 @@ const tiledataSpecialFlags = {
 };
 
 const findTile = id => tiles.find(tile => tile.index === id);
+
+// eslint-disable-next-line no-bitwise
+const getSpecialFlags = effect => _.mapValues(specialFlags, value => !!(effect & value));
 
 module.exports = class TiledataTerminal extends AnsiTerminal {
   constructor(cols, rows, scrollLength) {
@@ -134,7 +138,15 @@ module.exports = class TiledataTerminal extends AnsiTerminal {
       } = cell;
       const attributes = cell.getJSONAttributes();
       return ({
-        sym, glyph, glyphData: findTile(glyph), effect, window: tilesWindow, attributes, row, col,
+        sym,
+        glyph,
+        effect,
+        window: tilesWindow,
+        attributes,
+        row,
+        col,
+        glyphData: findTile(glyph),
+        effectData: getSpecialFlags(effect),
       });
     });
 
