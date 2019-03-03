@@ -1,5 +1,3 @@
-const _ = require('lodash');
-
 const NethackSession = require('./nethacksession');
 const { username, password } = require('./config');
 

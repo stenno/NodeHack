@@ -54,7 +54,6 @@ The bindings expose those windows in a game session:
 Each map cell contains the parsed glyph data of vt_tiledata:
 ```javascript
   const map = nethackSession.getMapWindow();
-  const objectsOnMap = map.getGlyphs()
-    .filter(glyph => glyph.data.section === 'objects')
+  const objectsOnMap = map.getObjectGlyphs()
     .map(({ row, col, data }) => ({ row, col, name: data.name }));
 ```

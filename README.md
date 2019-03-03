@@ -58,9 +58,9 @@ After input is completed, the bindings will update the windows and emit events a
 NodeHack maps tile glyph IDs:
 
 ```javascript
-  const objectGlyphs = map.getGlyphs().filter(glyph => glyph.data.section === 'objects');
-  const objects = objectGlyphs.map(glyph => glyph.data.name);
-  console.log(objects);
+  const objectGlyphsOnMap = map.getObjectGlyphs();
+  const objectsOnMap = objectGlyphsOnMap.map(glyph => glyph.data.name);
+  console.log(objectsOnMap);
 ```
 
 ### NetHack game session
