@@ -1,0 +1,34 @@
+{
+  "name": "nodehack",
+  "version": "1.0.0",
+  "description": "Low-level node.js bindings for NetHack 3.6.1",
+  "main": "example.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "dependencies": {
+    "eslint": "^5.13.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "lodash": "^4.17.11",
+    "node-ansiparser": "^2.2.0",
+    "node-ansiterminal": "^0.2.1-beta",
+    "node-pty": "^0.8.1",
+    "strip-ansi": "^5.0.0",
+    "termios": "^0.1.8"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stenno/NodeHack.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/stenno/NodeHack/issues"
+  },
+  "homepage": "https://github.com/stenno/NodeHack#readme"
+}
