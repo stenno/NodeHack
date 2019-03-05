@@ -11,6 +11,13 @@ Currently, the library relies on the [vt_tiledata](https://nethackwiki.com/wiki/
 
 Even though screen resizing is technically supported, it is thoroughly untested and the standard 80 columns x 24 rows layout should be used. This repository includes a [.nethackrc](./.nethackrc) file which is recommended for usage with the library. If you are feeling adventurous, play around with those options but expect it to break.
 
+## Installation
+
+NodeHack can be installed via npm: `npm install git+https://git@github.com/stenno/nodehack.git`
+
+```javascript
+  const { NethackSession, tiles } = require('nodehack');
+```
 
 ## Usage
 
