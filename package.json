@@ -2,7 +2,7 @@
   "name": "nodehack",
   "version": "1.0.0",
   "description": "Low-level node.js bindings for NetHack 3.6.1",
-  "main": "example.js",
+  "main": "nodehack.js",
   "directories": {
     "doc": "docs"
   },
