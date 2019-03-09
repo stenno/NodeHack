@@ -77,6 +77,7 @@ module.exports = class NethackSession extends EventEmitter {
     }
 
     this.emit('connected');
+    return this.windows;
   }
 
   getRawWindow(name) {
