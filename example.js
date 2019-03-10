@@ -18,9 +18,9 @@ const password = 'password';
       worn: /\((being (?<worn>worn))\)/,
     },
   };
-  const [{ data: { menu, status, map } }] = await nethackSession.doInput('i', customExpressions);
-  const { items, page, numPages } = menu;
-  const { turns } = status;
+  const [{ menu, status, map }] = await nethackSession.doInput('i', customExpressions);
+  const { items, page, numPages } = menu.data;
+  const { turns } = status.data;
 
   // all items with the attribute 'worn' matched the custom expression
   const wornItems = items.filter(item => item.worn !== null).map(item => item.item);

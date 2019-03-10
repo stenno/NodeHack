@@ -13,9 +13,16 @@ const getScreen = (parseData, windows) => {
     const { name } = coreWindow;
     const data = parseData[name];
     const window = windows[name];
+    if (typeof window === 'undefined') {
+      const screenWindow = {
+        core: coreWindow, data: [], window: [], glyphs: [], windowString: '',
+      };
+      return ({ ...result, [name]: screenWindow });
+    }
     const glyphs = window.getGlyphs();
+    const windowString = name === 'menu' ? window.toChunkedString() : window.toString();
     const screenWindow = {
-      core: coreWindow, data, window, glyphs,
+      core: coreWindow, data, window, glyphs, windowString,
     };
     return ({ ...result, [name]: screenWindow });
   }, {});
