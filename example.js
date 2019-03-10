@@ -18,7 +18,7 @@ const password = 'password';
       worn: /\((being (?<worn>worn))\)/,
     },
   };
-  const [{ menu, status, map }] = await nethackSession.doInput('i', customExpressions);
+  const [{ data: { menu, status, map } }] = await nethackSession.doInput('i', customExpressions);
   const { items, page, numPages } = menu;
   const { turns } = status;
 

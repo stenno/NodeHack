@@ -3,10 +3,21 @@ const { EventEmitter } = require('events');
 const _ = require('lodash'); // eslint-disable-line import/no-extraneous-dependencies
 
 const Client = require('./client');
-const { NethackWindow, windowIds } = require('./nhwindow');
+const { NethackWindow, coreTTYWindows, windowIds } = require('./nhwindow');
 const { servers } = require('./config');
 const expressions = require('./expressions');
 const Character = require('./character');
+
+const getScreen = (parseData, windows) => {
+  const windowData = coreTTYWindows.reduce((result, coreWindow) => {
+    const { name } = coreWindow;
+    const data = parseData[name];
+    const window = windows[name];
+    const screenWindow = { core: coreWindow, data, window };
+    return ({ ...result, [name]: screenWindow });
+  }, {});
+  return windowData;
+};
 
 const parseString = (str, parserExpressions) => {
   const parsed = _.mapValues(parserExpressions, (expression, key) => {
@@ -126,6 +137,17 @@ module.exports = class NethackSession extends EventEmitter {
     return this.getWindow('menu');
   }
 
+  getScreen() {
+    return ({
+      base: this.getBaseWindow(),
+      message: this.getMessageWindow(),
+      status: this.getStatusWindow(),
+      map: this.getMapWindow(),
+      text: this.getTextWindow(),
+      menu: this.getMenuWindow(),
+    });
+  }
+
   // the updateFoo functions need serious refactoring
   // message parsing TBI
   updateMessage(customExpressions) {
@@ -139,7 +161,7 @@ module.exports = class NethackSession extends EventEmitter {
 
     const parsedMessage = parseString(message, messageExpressions);
 
-    this.messages = [...this.messages, message];
+    this.messages = [...this.messages, { message, parsedMessage }];
     this.emit('updatedMessages', { message, parsedMessage });
     return parsedMessage;
   }
@@ -187,7 +209,6 @@ module.exports = class NethackSession extends EventEmitter {
     };
 
     const updatedStatusBar = parseString(statusBar, statusExpressions);
-
     this.statusBar = updatedStatusBar;
     this.emit('updatedStatusBar', this.statusBar);
     return this.statusBar;
@@ -241,11 +262,12 @@ module.exports = class NethackSession extends EventEmitter {
     const windows = await this.client.doNHInput(str);
     this.windows = windows;
     const parsedWindows = this.update(customExpressions);
+    const screen = getScreen(parsedWindows, this.getScreen());
     if (handleMore === false || parsedWindows.message.more === null) {
-      return [parsedWindows];
+      return [screen];
     }
     const nextMoreWindows = await this.doInput(' ', customExpressions, true);
-    return [...nextMoreWindows, parsedWindows];
+    return [...nextMoreWindows, screen];
   }
 
   update(customExpressions = {}) {
