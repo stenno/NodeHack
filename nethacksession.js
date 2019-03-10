@@ -13,7 +13,10 @@ const getScreen = (parseData, windows) => {
     const { name } = coreWindow;
     const data = parseData[name];
     const window = windows[name];
-    const screenWindow = { core: coreWindow, data, window };
+    const glyphs = window.getGlyphs();
+    const screenWindow = {
+      core: coreWindow, data, window, glyphs,
+    };
     return ({ ...result, [name]: screenWindow });
   }, {});
   return windowData;
