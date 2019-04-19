@@ -15,7 +15,7 @@ const getScreen = (parseData, windows) => {
     const window = windows[name];
     if (typeof window === 'undefined') {
       const screenWindow = {
-        core: coreWindow, data: [], window: [], glyphs: [], windowString: '',
+        core: coreWindow, data: [], window: null, glyphs: [], windowString: '',
       };
       return ({ ...result, [name]: screenWindow });
     }

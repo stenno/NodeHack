@@ -98,7 +98,7 @@ NodeHack uses regular expressions to parse menus, the status bar etc. See [expre
     },
   };
 
-  const [{ menu }] = await nethackSession.doInput('i', customExpressions);
+  const [{ menu }] = await nethackSession.doInput('i', customExpressions).slice(-1);
   const { items, page, numPages } = menu;
   const wornItems = items.filter(item => item.worn !== null);
   
