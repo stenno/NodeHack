@@ -8,7 +8,7 @@ const startscumItems = require('./startscum_items');
 
 const username = 'username';
 const password = 'password';
-const MAX_TRIES = 30;
+const MAX_TRIES = 10;
 const TIMEOUT = 10000;
 
 const menuExpressions = startscumItems.items.reduce((acc, cur) => {
@@ -33,13 +33,12 @@ const check = async (user, pw, tries) => {
   const [{ menu }] = screens.slice(-1);
   const { items } = menu.data;
   const menuKeys = Object.keys(menuExpressions);
-  const foundItems = menuKeys.filter(key => items.some(item => item[key] !== null));
-  const success = menuKeys.length === foundItems.length;
+  const success = menuKeys.every(key => items.some(item => item[key] !== null));
   await nethackSession.doInput(String.fromCharCode(0x1b)); // escape
   if (success) {
     await nethackSession.doInput('S');
     await nethackSession.doInput('y');
-    console.log(`Success: Found all items after ${MAX_TRIES - tries}!`);
+    console.log(`Success: Found all items after ${MAX_TRIES - tries + 1} tries`);
   } else {
     await nethackSession.doInput('#quit\n');
     await nethackSession.doInput('yq');

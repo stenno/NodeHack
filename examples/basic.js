@@ -1,4 +1,4 @@
-const { NethackSession } = require('../nodehack');
+const { NethackSession } = require('nodehack');
 
 const nethackSession = new NethackSession();
 const username = 'username';
