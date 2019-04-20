@@ -108,10 +108,10 @@ NodeHack uses regular expressions to parse menus, the status bar etc. See [expre
 
 A more detailed explanation about custom parse expressions will follow soon.
 
-### Example
+### Examples
 
-See [example.js](./example.js) for an example NetHack session.
-
+See [basic.js](./examples/basic.js) for a basic NodeHack session.
+See [startscum.js](./examples/startscum.js) for simple startscum script using NodeHack.
 
 ## Notes
 
